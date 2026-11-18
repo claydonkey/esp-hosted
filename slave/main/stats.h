@@ -115,6 +115,14 @@ struct pkt_stats_t {
 	uint32_t serial_tx_total;
 	uint32_t serial_tx_evt;
 	uint32_t slave_wifi_rx_msg_loaded;
+	uint32_t sta_forward_queue_high;
+	uint32_t sta_forward_queue_full;
+	uint32_t sta_forward_wait_max_us;
+	uint32_t sta_forward_fail;
+	uint32_t sdio_alloc_fail;
+	uint32_t sdio_send_fail;
+	uint32_t sdio_send_wait_max_us;
+	uint32_t sta_sdio_completed;
 };
 
 extern struct pkt_stats_t pkt_stats;

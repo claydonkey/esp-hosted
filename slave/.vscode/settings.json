@@ -1,0 +1,29 @@
+{
+    "idf.currentSetup": "D:/Espressif/frameworks/esp-idf-v5.2.6",
+    "idf.customExtraVars": {
+        "IDF_CCACHE_ENABLE": "1",
+        "IDF_PATH": "D:/Espressif/frameworks/esp-idf-v5.2.6",
+        "IDF_TOOLS_PATH": "D:/Espressif",
+        "IDF_TARGET": "esp32"
+    },
+    "idf.flashBaudRate": "115200",
+    "idf.port": "COM10",
+    "idf.flashType": "UART",
+    "idf.monitorPort": "COM10",
+    "idf.openOcdConfigs": [
+        "interface/ftdi/esp_ftdi.cfg",
+        "target/esp32.cfg"
+    ],
+    "cmake.configureEnvironment": {
+    "TEMP": "D:\\temp",
+    "TMP": "D:\\temp",
+    "TMPDIR": "D:\\temp",
+    "PATH": "D:\\msys64\\mingw64\\bin;D:\\msys64\\usr\\bin;${env:PATH}"
+  },
+  "cmake.buildEnvironment": {
+    "TEMP": "D:\\temp",
+    "TMP": "D:\\temp",
+    "TMPDIR": "D:\\temp",
+    "PATH": "D:\\msys64\\mingw64\\bin;D:\\msys64\\usr\\bin;${env:PATH}"
+  }
+}

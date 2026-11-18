@@ -391,6 +391,10 @@ static void sdio_tx_done_task(void* pvParameters)
 			ESP_LOGE(TAG, "sdio_slave_send_get_finished() error");
 			continue;
 		}
+#if ESP_PKT_STATS
+		if (((struct esp_payload_header *)sendbuf_p)->if_type == ESP_STA_IF)
+			pkt_stats.sta_sdio_completed++;
+#endif
 		sdio_buffer_tx_free(sendbuf_p);
 	}
 }
@@ -423,6 +427,9 @@ static int32_t sdio_write(interface_handle_t *handle, interface_buffer_handle_t 
 	sendbuf = sdio_buffer_tx_alloc(total_len, MEMSET_REQUIRED);
 	if (sendbuf == NULL) {
 		ESP_LOGE(TAG , "send buffer[%"PRIu32"] malloc fail", total_len);
+#if ESP_PKT_STATS
+		pkt_stats.sdio_alloc_fail++;
+#endif
 		return ESP_FAIL;
 	}
 
@@ -447,13 +454,24 @@ static int32_t sdio_write(interface_handle_t *handle, interface_buffer_handle_t 
 
 	ESP_HEXLOGD("sdio_tx", sendbuf, min(32,total_len));
 
+#if ESP_PKT_STATS
+	int64_t send_started = esp_timer_get_time();
+#endif
 #if !SIMPLIFIED_SDIO_SLAVE
 	ret = sdio_slave_send_queue(sendbuf, total_len, sendbuf, portMAX_DELAY);
 #else
 	ret = sdio_slave_transmit(sendbuf, total_len);
 #endif
+#if ESP_PKT_STATS
+	uint32_t elapsed = (uint32_t)(esp_timer_get_time() - send_started);
+	if (elapsed > pkt_stats.sdio_send_wait_max_us)
+		pkt_stats.sdio_send_wait_max_us = elapsed;
+#endif
 	if (ret != ESP_OK) {
 		ESP_LOGE(TAG , "sdio slave transmit error, ret : 0x%x\r\n", ret);
+#if ESP_PKT_STATS
+		pkt_stats.sdio_send_fail++;
+#endif
 		sdio_buffer_tx_free(sendbuf);
 		return ESP_FAIL;
 	}
@@ -463,9 +481,9 @@ static int32_t sdio_write(interface_handle_t *handle, interface_buffer_handle_t 
 #endif
 
 #if ESP_PKT_STATS
-	if (header->if_type == ESP_STA_IF)
+	if (buf_handle->if_type == ESP_STA_IF)
 		pkt_stats.sta_sh_out++;
-	else if (header->if_type == ESP_SERIAL_IF)
+	else if (buf_handle->if_type == ESP_SERIAL_IF)
 		pkt_stats.serial_tx_total++;
 #endif
 	return buf_handle->payload_len;

@@ -4,7 +4,7 @@ else()
     set(common_dir "../../common")
 endif()
 
-set(COMPONENT_SRCS "slave_control.c" "${common_dir}/proto/esp_hosted_rpc.pb-c.c" "protocomm_pserial.c" "app_main.c" "slave_bt.c" "mempool.c" "stats.c"  "mempool_ll.c")
+set(COMPONENT_SRCS "sdio_slave_api.c" "slave_control.c" "${common_dir}/proto/esp_hosted_rpc.pb-c.c" "protocomm_pserial.c" "app_main.c" "slave_bt.c" "mempool.c" "stats.c"  "mempool_ll.c")
 set(COMPONENT_ADD_INCLUDEDIRS "." "${common_dir}/include" "${common_dir}/proto")
 
 if(CONFIG_ESP_SDIO_HOST_INTERFACE)

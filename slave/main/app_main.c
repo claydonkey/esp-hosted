@@ -584,9 +584,22 @@ int send_to_host_queue(interface_buffer_handle_t *buf_handle, uint8_t queue_type
 	process_tx_pkt(buf_handle);
 	return ESP_OK;
 #else
+
+#if ESP_PKT_STATS
+	int64_t queue_started = esp_timer_get_time();
+	if (buf_handle->if_type == ESP_STA_IF) {
+		uint32_t depth = uxQueueMessagesWaiting(to_host_queue[queue_type]);
+		if (depth > pkt_stats.sta_forward_queue_high)
+			pkt_stats.sta_forward_queue_high = depth;
+		if (depth == TO_HOST_QUEUE_SIZE) pkt_stats.sta_forward_queue_full++;
+	}
+#endif
 	int ret = xQueueSend(to_host_queue[queue_type], buf_handle, portMAX_DELAY);
 	if (ret != pdTRUE) {
 		ESP_LOGE(TAG, "Failed to send buffer into queue[%u]\n",queue_type);
+#if ESP_PKT_STATS
+		if (buf_handle->if_type == ESP_STA_IF) pkt_stats.sta_forward_fail++;
+#endif
 		return ESP_FAIL;
 	}
 	if (queue_type == PRIO_Q_SERIAL)
@@ -595,9 +608,20 @@ int send_to_host_queue(interface_buffer_handle_t *buf_handle, uint8_t queue_type
 		ret = xQueueSend(meta_to_host_queue, &queue_type, portMAX_DELAY);
 
 	if (ret != pdTRUE) {
+#if ESP_PKT_STATS
+		if (buf_handle->if_type == ESP_STA_IF) pkt_stats.sta_forward_fail++;
+#endif
 		ESP_LOGE(TAG, "Failed to send buffer into meta queue[%u]\n",queue_type);
 		return ESP_FAIL;
 	}
+
+#if ESP_PKT_STATS
+	if (buf_handle->if_type == ESP_STA_IF) {
+		uint32_t elapsed = (uint32_t)(esp_timer_get_time() - queue_started);
+		if (elapsed > pkt_stats.sta_forward_wait_max_us)
+			pkt_stats.sta_forward_wait_max_us = elapsed;
+	}
+#endif
 
 	return ESP_OK;
 #endif

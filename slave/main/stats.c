@@ -212,6 +212,13 @@ static void stats_timer_func(void* arg)
 			pkt_stats.hs_bus_sta_in,pkt_stats.hs_bus_sta_out, pkt_stats.hs_bus_sta_fail,
 			pkt_stats.sta_sh_in,pkt_stats.sta_sh_out,
 			pkt_stats.serial_rx, pkt_stats.serial_tx_total, pkt_stats.serial_tx_evt);
+	/* Cumulative counters: report aggregates, never log per received packet. */
+	ESP_LOGI(TAG, "ESP_FORWARD wifi_in=%lu sdio_queued=%lu sdio_completed=%lu queue_high=%lu queue_full=%lu queue_wait_max_us=%lu forward_fail=%lu alloc_fail=%lu send_fail=%lu send_wait_max_us=%lu",
+		pkt_stats.sta_sh_in, pkt_stats.sta_sh_out, pkt_stats.sta_sdio_completed,
+		pkt_stats.sta_forward_queue_high, pkt_stats.sta_forward_queue_full,
+		pkt_stats.sta_forward_wait_max_us, pkt_stats.sta_forward_fail,
+		pkt_stats.sdio_alloc_fail, pkt_stats.sdio_send_fail,
+		pkt_stats.sdio_send_wait_max_us);
 
 #endif
 }
